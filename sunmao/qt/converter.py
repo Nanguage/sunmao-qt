@@ -1,12 +1,13 @@
 import typing as T
 
-from easynode.model import Node as ViewNode
 from easynode.model.edge import Edge as ViewEdge
 from easynode.model.port import Port as ViewPort
 from easynode.model.port import DataPort as ViewDataPort
 from easynode.model.graph import Graph as ViewGraph
 from sunmao.core.node import ComputeNode
 from sunmao.core.flow import Flow
+
+from .model import ViewNode
 
 if T.TYPE_CHECKING:
     from .main import SunmaoQt
