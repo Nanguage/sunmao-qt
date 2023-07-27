@@ -2,13 +2,14 @@ import sys
 import typing as T
 
 from qtpy import QtWidgets
-from easynode.node_editor import NodeEditor
-from easynode.setting import EditorSetting
 from sunmao.api import Session, Flow, compute
 from sunmao.core.node import ComputeNode
 
 from .ui.menubar import Menubar
 from .converter import Converter
+from .signal_binder import SignalBinder
+from .easynode.node_editor import NodeEditor
+from .easynode import EditorSetting
 
 
 class SunmaoQt(QtWidgets.QWidget):
@@ -27,6 +28,7 @@ class SunmaoQt(QtWidgets.QWidget):
             session = Session()
         self.session = session
         self.converter = Converter(parent=self)
+        self.signal_binder = SignalBinder(parent=self)
         self._init_node_editor_from_session()
 
     def _init_ui(self):
@@ -41,8 +43,8 @@ class SunmaoQt(QtWidgets.QWidget):
 
     def register_node_class(self, *node_cls: T.Type[ComputeNode]):
         for ncls in node_cls:
-            view_node_cls = self.converter.compute_node2view_node(ncls)
-            self.node_editor.factory_table.register(view_node_cls)
+            view_node_cls = self.converter.compute_node_cls2view_node_cls(ncls)
+            self.node_editor.register_factory(view_node_cls)
             self.core_node_classes[ncls.__name__] = ncls
 
     def _init_node_editor_from_session(self):

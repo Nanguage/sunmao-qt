@@ -1,13 +1,12 @@
 import typing as T
 
-from easynode.model.edge import Edge as ViewEdge
-from easynode.model.port import Port as ViewPort
-from easynode.model.port import DataPort as ViewDataPort
-from easynode.model.graph import Graph as ViewGraph
 from sunmao.core.node import ComputeNode
 from sunmao.core.flow import Flow
 
-from .model import ViewNode
+from .easynode.model import (
+    ViewNode, ViewEdge,
+    ViewPort, ViewDataPort, ViewGraph,
+)
 
 if T.TYPE_CHECKING:
     from .main import SunmaoQt
@@ -18,7 +17,7 @@ class Converter:
     def __init__(self, parent: "SunmaoQt"):
         self.parent = parent
 
-    def compute_node2view_node(
+    def compute_node_cls2view_node_cls(
             self,
             cnode: T.Type[ComputeNode]
             ) -> T.Type[ViewNode]:
@@ -64,6 +63,7 @@ class Converter:
                 self.parent.register_node_class(core_cls)
             vnode = self.parent.node_editor.create_node(
                 cls_name, node_name=cnode.name)
+            self.parent.signal_binder.bind_node(vnode, cnode)
             vgraph.add_node(vnode)
             cnode_id2vnode[cnode.id] = vnode
         for cedge in flow.connections.values():
@@ -74,5 +74,7 @@ class Converter:
             vport_from = vnode_from.output_ports[cport_from.index]
             vport_to = vnode_to.input_ports[cport_to.index]
             vedge = ViewEdge(vport_from, vport_to)
+            self.parent.signal_binder.bind_edge(vedge, cedge)
             vgraph.add_edge(vedge)
+        self.parent.signal_binder.bind_graph(vgraph, flow)
         return vgraph
