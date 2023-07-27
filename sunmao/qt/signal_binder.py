@@ -1,8 +1,10 @@
 import typing as T
-from .easynode.model import ViewNode, ViewEdge, ViewGraph
 from sunmao.core.node import ComputeNode
 from sunmao.core.connection import Connection
 from sunmao.core.flow import Flow
+
+from .easynode.model import ViewNode, ViewEdge, ViewGraph
+from .utils import logger
 
 if T.TYPE_CHECKING:
     from .main import SunmaoQt
@@ -34,7 +36,7 @@ class SignalBinder:
 
             def _on_edge_added(vedge: "ViewEdge"):
                 vedge = ViewEdge.cast(vedge)
-                cedge = vedge.create_core_edge()
+                cedge = self.parent.converter.view_edge2core_edge(vedge)
                 cgraph.add_obj(cedge)
                 self.bind_edge(vedge, cedge)
             vgraph.edge_added.connect(_on_edge_added)
@@ -44,3 +46,21 @@ class SignalBinder:
                 cgraph.remove_obj(cedge)
                 vedge.core_edge = None
             vgraph.edge_removed.connect(_on_edge_removed)
+
+            def _on_node_added(vnode: "ViewNode"):
+                cnode = self.parent.converter.view_node2core_node(vnode)
+                cgraph.add_obj(cnode)
+                self.bind_node(vnode, cnode)
+            vgraph.node_added.connect(_on_node_added)
+
+            def _on_node_removed(vnode: "ViewNode"):
+                cnode = vnode.core_node
+                cgraph.remove_obj(cnode)
+                vnode.core_node = None
+            vgraph.node_removed.connect(_on_node_removed)
+
+            def _on_elements_changed():
+                logger.debug("Elements changed.")
+                logger.debug(f"Current nodes: {cgraph.nodes}")
+                logger.debug(f"Current edges: {cgraph.connections}")
+            vgraph.elements_changed.connect(_on_elements_changed)

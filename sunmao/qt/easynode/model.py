@@ -54,24 +54,9 @@ class ViewEdge(Edge):
         super().__init__(port1, port2)
         self.core_edge: Connection | None = None
 
-    def create_core_edge(self) -> Connection:
-        s_port = self.source_port
-        t_port = self.target_port
-        if s_port.type == "in":
-            s_core_port = s_port.node.core_node.input_ports[s_port.index]
-        else:
-            s_core_port = s_port.node.core_node.output_ports[s_port.index]
-        if t_port.type == "in":
-            t_core_port = t_port.node.core_node.input_ports[t_port.index]
-        else:
-            t_core_port = t_port.node.core_node.output_ports[t_port.index]
-        return Connection(
-            source=s_core_port,
-            target=t_core_port,
-        )
-
     @classmethod
     def cast(cls, edge: Edge) -> "ViewEdge":
+        """Cast an EasyNode Edge to ViewEdge."""
         if isinstance(edge, cls):
             return edge
         return ViewEdge(edge.source_port, edge.target_port)

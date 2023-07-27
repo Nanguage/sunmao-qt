@@ -2,6 +2,7 @@ import typing as T
 
 from sunmao.core.node import ComputeNode
 from sunmao.core.flow import Flow
+from sunmao.core.connection import Connection
 
 from .easynode.model import (
     ViewNode, ViewEdge,
@@ -78,3 +79,27 @@ class Converter:
             vgraph.add_edge(vedge)
         self.parent.signal_binder.bind_graph(vgraph, flow)
         return vgraph
+
+    def view_node2core_node(self, view_node: "ViewNode") -> "ComputeNode":
+        """Convert a ViewNode to a ComputeNode."""
+        core_cls = self.parent.core_node_classes[view_node.type_name()]
+        cnode = core_cls(name=view_node.name)
+        return cnode
+
+    def view_edge2core_edge(self, view_edge: "ViewEdge") -> "Connection":
+        """Convert a ViewEdge to a Connection."""
+        vedge = view_edge
+        s_port = vedge.source_port
+        t_port = vedge.target_port
+        if s_port.type == "in":
+            s_core_port = s_port.node.core_node.input_ports[s_port.index]
+        else:
+            s_core_port = s_port.node.core_node.output_ports[s_port.index]
+        if t_port.type == "in":
+            t_core_port = t_port.node.core_node.input_ports[t_port.index]
+        else:
+            t_core_port = t_port.node.core_node.output_ports[t_port.index]
+        return Connection(
+            source=s_core_port,
+            target=t_core_port,
+        )
