@@ -46,6 +46,10 @@ class ViewNode(Node):
         super().__init__(name, **attrs)
         self.core_node: ComputeNode | None = None
 
+    def _on_name_changed(self, name: str) -> None:
+        if self.core_node is not None:
+            self.core_node.name = name
+
 
 class ViewEdge(Edge):
     def __init__(self, port1: ViewPort, port2: ViewPort) -> None:

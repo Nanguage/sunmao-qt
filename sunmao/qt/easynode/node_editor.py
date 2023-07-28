@@ -1,9 +1,14 @@
 from easynode.node_editor import NodeEditor
+from sunmao.core.session import Session
 
 from .model import ViewNode
 
 
 class NodeEditor(NodeEditor):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.core_session: Session | None = None
+
     def create_node(
             self, type_name,
             node_name: str | None = None,

@@ -80,6 +80,10 @@ class Converter:
         self.parent.signal_binder.bind_graph(vgraph, flow)
         return vgraph
 
+    def new_core_flow(self) -> "Flow":
+        cgraph = Flow()
+        return cgraph
+
     def view_node2core_node(self, view_node: "ViewNode") -> "ComputeNode":
         """Convert a ViewNode to a ComputeNode."""
         core_cls = self.parent.core_node_classes[view_node.type_name()]

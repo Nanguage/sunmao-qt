@@ -3,7 +3,9 @@ from sunmao.core.node import ComputeNode
 from sunmao.core.connection import Connection
 from sunmao.core.flow import Flow
 
+from .easynode import GraphicsScene
 from .easynode.model import ViewNode, ViewEdge, ViewGraph
+from .easynode.node_editor import NodeEditor
 from .utils import logger
 
 if T.TYPE_CHECKING:
@@ -19,6 +21,8 @@ class SignalBinder:
         """Bind signals to a ViewNode."""
         if vnode.core_node is None:
             vnode.core_node = cnode
+            vnode.renamed.connect(vnode._on_name_changed)
+            # bind signals to ports
             for vport in vnode.input_ports + vnode.output_ports:
                 vport.edge_added.connect(
                     vport._on_edge_added,
@@ -60,7 +64,22 @@ class SignalBinder:
             vgraph.node_removed.connect(_on_node_removed)
 
             def _on_elements_changed():
-                logger.debug("Elements changed.")
-                logger.debug(f"Current nodes: {cgraph.nodes}")
-                logger.debug(f"Current edges: {cgraph.connections}")
+                logger.debug(f"Flow({cgraph.name}) elements changed.")
+                logger.debug(f"Nodes: {cgraph.nodes}")
+                logger.debug(f"Edges: {cgraph.connections}")
             vgraph.elements_changed.connect(_on_elements_changed)
+
+    def bind_editor(self, editor: "NodeEditor"):
+        """Bind signals to a NodeEditor."""
+        if editor.core_session is None:
+            editor.core_session = self.parent.session
+
+            def _on_add_scene(scene: "GraphicsScene"):
+                vgraph = scene.graph = ViewGraph()
+                cgraph = self.parent.converter.new_core_flow()
+                print(cgraph.name)
+                editor.tabs.setTabText(
+                    editor.tabs.count() - 1,
+                    cgraph.name)
+                self.bind_graph(vgraph, cgraph)
+            editor.scene_added.connect(_on_add_scene)

@@ -21,14 +21,14 @@ class SunmaoQt(QtWidgets.QWidget):
             session: T.Optional[Session] = None,
             editor_setting: T.Optional[EditorSetting] = None):
         super().__init__()
-        self._editor_setting = editor_setting
         self.__class__.current_instance = self
-        self._init_ui()
+        self.converter = Converter(parent=self)
+        self.signal_binder = SignalBinder(parent=self)
+        self._editor_setting = editor_setting
         if session is None:
             session = Session()
         self.session = session
-        self.converter = Converter(parent=self)
-        self.signal_binder = SignalBinder(parent=self)
+        self._init_ui()
         self._init_node_editor_from_session()
 
     def _init_ui(self):
@@ -37,7 +37,7 @@ class SunmaoQt(QtWidgets.QWidget):
         self.node_editor = NodeEditor(
             parent=self, setting=self._editor_setting,
             init_scene=False)
-
+        self.signal_binder.bind_editor(self.node_editor)
         self.layout.setMenuBar(self.menubar)
         self.layout.addWidget(self.node_editor)
 
